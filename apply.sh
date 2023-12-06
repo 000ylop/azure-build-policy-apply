@@ -37,12 +37,11 @@ function get_repo_id {
 typeset -fx get_repo_id
 
 function get_pipeline_definition_id {
-  az pipelines build definition list \
+  az pipelines build definition show \
+    --name "${pipeline_name}" \
     --org "${org_url}" \
     --proj "${proj_name}" \
-    --repository "${repo_name}" \
-    --name "${pipeline_name}"  \
-    --query '[0].id'
+    --query 'id'
 }
 typeset -fx get_pipeline_definition_id
 
