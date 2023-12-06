@@ -79,7 +79,7 @@ function setup_build_validation() {
     --blocking true \
     --branch ${branch} \
     --build-definition-id ${build_definition_id}\
-    --display-name \
+    --display-name "" \
     --enabled true \
     --manual-queue-only false \
     --queue-on-source-update-only true \
@@ -93,3 +93,5 @@ function setup_build_validation() {
 export repo_id=$( get_repo_id )
 
 print_policy_list
+setup_build_policy
+setup_build_validation
