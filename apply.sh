@@ -104,7 +104,7 @@ setup_build_policy() {
         -d '
     {
         "isEnabled": true,
-        "isBlocking": false,
+        "isBlocking": true,
         "type": {
             "id": "fa4e907d-c16b-4a4c-9dfa-4906e5d171dd"
         },
