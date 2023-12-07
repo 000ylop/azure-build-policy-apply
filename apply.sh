@@ -124,7 +124,8 @@ setup_branch_security() {
 	--id $GIT_REPO_NAMESPACE \
 	--subject "${user_email}" \
 	--token repoV2/${proj_id}/${repo_id}/refs/heads/$(echo "${branch}" | python branch_name_hex.py) \
-	--allow-bit 2048
+	--allow-bit 2048 \
+	--org ${org_url}
 }
 
 setup_build_policy() {
