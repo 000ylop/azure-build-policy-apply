@@ -3,14 +3,23 @@
 show_usage() {
     cat <<-EOF
 Usage:
-$0 --org-name {string} --proj-name {string} [--repo-name {string} | --repo-id {string}] [--branch {string}] [--pipeline-name {string} | --build-definition-id {number}]
+    $0 --org-name {string} --proj-name {string} [--repo-name {string} | --repo-id {string}] [--branch {string}] [--pipeline-name {string} | --build-definition-id {number}]
 
 Examples:
-$0 --org-name azvse --proj-name aztest --repo-name aztest --branch bensl/tmpbuild/1201 --pipeline-name Overlake-Build-PullRequest
-$0 --org-name azvse --proj-name aztest --repo-id a4822210-511f-427f-a36d-26a14c29cc89 --branch bensl/tmpbuild/1201 --build-definition-id 2
+    $0 --org-name azvse --proj-name aztest --repo-name aztest --branch bensl/tmpbuild/1201 --pipeline-name Overlake-Build-PullRequest
+    $0 --org-name azvse --proj-name aztest --repo-id a4822210-511f-427f-a36d-26a14c29cc89 --branch bensl/tmpbuild/1201 --build-definition-id 2
 
 EOF
 }
+
+get_proj_id() {
+    az devops project show \
+        --project aztest \
+	--query "id" \
+	--org https://dev.azure.com/azvse \
+	--output tsv
+}
+typeset -fx get_proj_id
 
 get_repo_id() {
     az repos list \
@@ -42,6 +51,10 @@ while [[ $# -gt 0 ]]; do
             proj_name=$2
             shift 2
             ;;
+        --proj-id)
+            proj_id=$2
+            shift 2
+            ;;
         --repo-name)
             repo_name=$2
             shift 2
@@ -51,7 +64,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --branch)
-            branch=$2
+            export branch=$2
             shift 2
             ;;
         --pipeline-name)
@@ -81,6 +94,11 @@ if [[ ! "${pat}" ]]; then
     exit 2
 fi
 
+if [[ ! "${proj_id}" ]]
+then
+    proj_id=$(get_proj_id)
+fi
+
 if [[ ! ${repo_id} && ${repo_name} ]]; then
     repo_id=$(get_repo_id)
     echo repo_id: ${repo_id}
@@ -97,6 +115,16 @@ print_policy_list() {
         --repository-id "${repo_id}" \
         --org "${org_url}" \
         --project "${proj_name}"
+}
+
+user_email="tmp1@recolic.net"
+setup_branch_security() {
+    GIT_REPO_NAMESPACE=2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87
+    az devops security permission update \
+	--id $GIT_REPO_NAMESPACE \
+	--subject "${user_email}" \
+	--token repoV2/${proj_id}/${repo_id}/refs/heads/$(echo "${branch}" | python branch_name_hex.py) \
+	--allow-bit 2048
 }
 
 setup_build_policy() {
@@ -146,5 +174,6 @@ setup_build_validation() {
 }
 
 print_policy_list
+setup_branch_security
 setup_build_policy
 setup_build_validation
