@@ -3,11 +3,11 @@
 show_usage() {
     cat <<-EOF
 Usage:
-$0 --org-url {org_url} --proj-name {proj_name} [--repo-name {repo_name} | --repo-id {repo_id}] [--branch {branch}] [--pipeline-name {pipeline_name} | --build-definition-id {build_definition_id}]
+$0 --org-name {string} --proj-name {string} [--repo-name {string} | --repo-id {string}] [--branch {string}] [--pipeline-name {string} | --build-definition-id {number}]
 
 Examples:
-$0 --org-url https://dev.azure.com/azvse --proj-name aztest --repo-name aztest --branch bensl/tmpbuild/1201 --pipeline-name Overlake-Build-PullRequest
-$0 --org-url https://dev.azure.com/azvse --proj-name aztest --repo-id a4822210-511f-427f-a36d-26a14c29cc89 --branch bensl/tmpbuild/1201 --build-definition-id 2
+$0 --org-name azvse --proj-name aztest --repo-name aztest --branch bensl/tmpbuild/1201 --pipeline-name Overlake-Build-PullRequest
+$0 --org-name azvse --proj-name aztest --repo-id a4822210-511f-427f-a36d-26a14c29cc89 --branch bensl/tmpbuild/1201 --build-definition-id 2
 
 EOF
 }
@@ -34,8 +34,8 @@ typeset -fx get_build_definition_id
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --org-url)
-            org_url=$2
+        --org-name)
+            org_name=$2
             shift 2
             ;;
         --proj-name)
@@ -69,7 +69,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ ! ${org_url} || ! ${proj_name} || (! ${repo_name} && ! ${repo_id}) || (! ${pipeline_name} && ! ${build_definition_id}) ]]; then
+org_url=https://dev.azure.com/$org_name
+
+if [[ ! ${org_name} || ! ${proj_name} || (! ${repo_name} && ! ${repo_id}) || (! ${pipeline_name} && ! ${build_definition_id}) ]]; then
     show_usage
     exit 1
 fi
